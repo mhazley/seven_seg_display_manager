@@ -47,7 +47,7 @@ func (d *NumericDisplay) SetDigit(pos int, digit rune, decimal bool) error {
 }
 
 func (d *NumericDisplay) WriteString(s string) (int, error) {
-	log.Info().Str("WriteString", s).Send()
+	log.Debug().Str("NumericDisplay->WriteString", s).Send()
 	if err := d.dev.Halt(); err != nil {
 		return 0, err
 	}

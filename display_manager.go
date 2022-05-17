@@ -7,8 +7,16 @@ import (
 )
 
 type DisplayManager struct {
-	hltDisplay *NumericDisplay
+	dispOne *NumericDisplay
+	dispTwo *NumericDisplay
 }
+
+type Display int8
+
+const (
+	DisplayOne Display = iota
+	DisplayTwo
+)
 
 func NewDisplayManager() (DisplayManager, error) {
 	dm := DisplayManager{}
@@ -26,19 +34,36 @@ func (d *DisplayManager) init() error {
 		log.Fatal().Err(err).Msg("Failed to open i2c")
 	}
 
-	d.hltDisplay, err = NewNumericDisplay(bus, Ht16k33I2CAddr+0)
+	d.dispOne, err = NewNumericDisplay(bus, Ht16k33I2CAddr+0)
+	d.dispTwo, err = NewNumericDisplay(bus, Ht16k33I2CAddr+1)
 
 	return err
 }
 
-func (d *DisplayManager) SetHltColon(state bool) error {
-	return d.hltDisplay.SetColon(state)
+func (d *DisplayManager) SetDispColon(disp Display, state bool) error {
+	switch disp {
+	case DisplayOne:
+		return d.dispOne.SetColon(state)
+	case DisplayTwo:
+		return d.dispTwo.SetColon(state)s
+	}
+	return nil
 }
 
-func (d *DisplayManager) DisplayStringHlt(dStr string) error {
-	if _, err := d.hltDisplay.WriteString(dStr); err != nil {
-		log.Error().Err(err).Msg("Failed to display string on HLT")
-		return err
+func (d *DisplayManager) DisplayString(disp Display, dStr string) error {
+	switch disp {
+	case DisplayOne:
+		if _, err := d.dispOne.WriteString(dStr); err != nil {
+			log.Error().Err(err).Msg("Failed to display string on Display One")
+			return err
+		}
+		break
+	case DisplayTwo:
+		if _, err := d.dispTwo.WriteString(dStr); err != nil {
+			log.Error().Err(err).Msg("Failed to display string on Display Two")
+			return err
+		}
+		break
 	}
 	return nil
 }
